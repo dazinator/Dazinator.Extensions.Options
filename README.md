@@ -42,8 +42,8 @@ The default `IHttpClientFactory` provided by Microsoft, builds and pools handler
 So if you've configured a http client named "foo" and you later use that http client via the factory - it will be built according to the `HttpClientFactoryOptions` with the same name - if you want to change this confiugration, you can't.
 Therefore if you want reconfigure a named http client at runtime (for example, change it's configured `BaseAddress`, or `Handlers`), the simplest way to acheive this is to request the http client with a different name - i.e perhaps with a version identifier appended which can be incremented.
 This forces the `IHttpClientFactory` to miss its cache, and build a new http client which can be based on the latest configuration.
-```
 
+```cs
 services.Configure<HttpClientFactoryOptions>((sp, name, options) =>
                 {
                   // name is the httpclient name that has been requested.
