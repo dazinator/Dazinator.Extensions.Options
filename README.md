@@ -39,7 +39,7 @@ The primary use case for this feature is `IHttpClientFactory`, which uses named 
 By supplying different names you can kind of "cache bust" and force a new HttpClient to be built that uses the latest configuration.
 
 The default `IHttpClientFactory` provided by Microsoft, builds and pools handlers for a given `name`d http client, and uses the `HttpClientFactoryOptions` registered with the same name to do this.
-So if you've configured a http client named "foo" and you later use that http client via the factory - it will be built according to the 'HttpClientFactoryOptions` with the same name - if you want to change this confiugration, you can't.
+So if you've configured a http client named "foo" and you later use that http client via the factory - it will be built according to the `HttpClientFactoryOptions` with the same name - if you want to change this confiugration, you can't.
 Therefore if you want reconfigure a named http client at runtime (for example, change it's configured `BaseAddress`, or `Handlers`), the simplest way to acheive this is to request the http client with a different name - i.e perhaps with a version identifier appended which can be incremented.
 This forces the `IHttpClientFactory` to miss its cache, and build a new http client which can be based on the latest configuration.
 ```
