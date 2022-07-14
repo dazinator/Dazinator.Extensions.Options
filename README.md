@@ -1,24 +1,38 @@
 ## Features
-- Versioning done with GitVersion.
-- Can build via:
-  - AppVeyor
-  - Azure Devops Pipelines
-  - GitHub Actions
- 
-- All projects will be SourceLinked to github thanks to `directory.props` file.
-- Version numbering produced via GitVersion
-- dotnet-format checks formatting errors
-  - If building via GitHub Actions, the workflow will auto fix and push formatting fixes without failing the build.
 
-# [Getting Started]
-- Clone this repo, then push to your own origin.
-- Create your solution (.sln) and projects in the `/src` directory.
-- Make sure global.json has the right version of the .net sdk that you require.
-- If you want to run the `dotnet-format` and `gitversion` tools (that are used as part of the CI builds) locally, then install them by running the following command in the repo root directory:
-    `dotnet tool restore`
-- For AppVeyor builds, update AppVeyor.yml:
-    - dotnet sdk version (currently set to install latest pre-release).
-    - Now you can add to AppVeyor.
-- For Azure Devops builds:
-    - Import pipelines yaml file into Azure Devops pipeline.
-- For GitHub Actions - the workflow file is detected automatically when you push up and should be run.
+Provides additional capabilities for `Microsoft.Extensions.Options`.
+
+### Configure dynamically named options
+
+### The problem
+The standard `Microsoft.Extensions.Options` functionality allows you to register "named" options in startup code.
+However, you must know all of the names of the options that will be requested - ahead of time - i.e at the point of registration however.
+
+e.g
+
+```cs
+
+ services.Configure<TestOptions>("bar", options =>
+                {                   
+                    
+                });
+
+```
+
+This means you can then request options named "bar" and your registered delegates will take effect.
+
+However if you request a name like "bar-v2" that wasn't registered in advance, then you'll have no way to intercept and configure this named options.
+
+This library provides such a mechanism, via some overloads that allow you to supply an `Action` delegate that will be invoked, with the name supplied at runtime, allowing you to configure any names that appear dynamically whilst the app is running:
+
+```cs
+services.Configure<TestOptions>((sp, name, options) =>
+                {
+                  // name is the name that has been requested.
+                    
+                });
+
+```
+
+You can now request whatever named options you like at runtime, and the method above will be invoked to configure these instances.
+This allows you to configure dynamically named options i.e without having to register all the possible names in advance.
