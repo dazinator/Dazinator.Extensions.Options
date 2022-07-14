@@ -52,7 +52,8 @@ services.Configure<HttpClientFactoryOptions>((sp, name, options) =>
                 });
 
 
-// ...
+// Note: the "-v1", "-v2" acts as a kind of "cache busting" mechanism, to ensure that IHttpClientFactory will build a new http client
+// in conjunction with the Configure method above, that ensures we can still configure the `HttpClientFactoryOptions` based on the latest settings we have for this client.
 IHttpClientFactory httpClientFactory = GetHttpClientFactory();
 var fooClientv1 = httpClientFactory.CreateClient("foo-v1");
 
