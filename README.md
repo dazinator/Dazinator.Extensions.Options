@@ -4,7 +4,6 @@ Provides additional capabilities for `Microsoft.Extensions.Options`.
 
 ### Configure dynamically named options
 
-### The problem
 The standard `Microsoft.Extensions.Options` functionality allows you to register "named" options in startup code.
 However, you must know all of the names of the options that will be requested - ahead of time - i.e at the point of registration, e.g:
 
