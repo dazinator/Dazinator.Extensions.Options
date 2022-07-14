@@ -55,6 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GitVersion.SemVer:
+      NUGET_AUTH_TOKEN: '%NUGET_AUTH_TOKEN%'
     steps:    
     - name: Checkout
       uses: actions/checkout@v2
@@ -64,7 +65,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 6.0.x            
 
     - name: Restore dotnet tools
       run: dotnet tool restore 
@@ -79,13 +80,19 @@ jobs:
       run: dotnet build src --no-restore --configuration Release /p:Version=${{ env.GitVersion_SemVer }}
 
     - name: Test
-      run: dotnet test src -c Release --no-build --verbosity normal
-    
-    - name: Configure nuget
-      run: dotnet nuget add source --username dazinator --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/dazinator/index.json"
+      run: dotnet test src -c Release --no-build --verbosity normal    
+       
+    #- name: Configure nuget for nuget org
+    #  run: dotnet nuget add source --name nugetorg "https://api.nuget.org/v3/index.json"
+
+    #- name: Configure nuget for github packages
+    #  run: dotnet nuget add source --username dazinator --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/dazinator/index.json"
     
     - name: Pack nuget
       run: dotnet pack src --no-build --configuration Release /p:PackageVersion=${{ env.GitVersion_SemVer }}
 
-    - name: Push nuget
-      run: dotnet nuget push "src/**/*.nupkg" -s github
+    - name: Push nuget to github
+      run: dotnet nuget push "src/**/*.nupkg" -s "https://nuget.pkg.github.com/dazinator/index.json" --api-key ${{secrets.GITHUB_TOKEN}} --skip-duplicate
+
+    - name: Push nuget to nuget org
+      run: dotnet nuget push "src/**/*.nupkg" -s "https://api.nuget.org/v3/index.json" --api-key ${{secrets.NUGET_TOKEN}} --skip-duplicate
