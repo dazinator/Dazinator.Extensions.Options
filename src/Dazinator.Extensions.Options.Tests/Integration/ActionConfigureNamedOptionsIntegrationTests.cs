@@ -43,6 +43,41 @@ namespace Dazinator.Extensions.Options.Tests.Integration
             Assert.Equal(distinctNamedCount, invocationCount);
         }
 
+        /// <summary>
+        /// Verifies that when a http client with a name is requested, we can configure it's <see cref="HttpClientFactoryOptions"/> and this configuration happens once per name.
+        /// </summary>
+        [Theory]
+        [InlineData("foo", "foo-v2", "bar", "bar-v2")] // each 
+        [InlineData("foo", "foo", "foo", "foo", "foo")]
+        public void Can_Configure_Using_OptionsBuilder(params string[] names)
+        {
+            var invocationCount = 0;
+
+            var optionsSnapshot = TestHelper.CreateTestSubject<IOptionsSnapshot<TestOptions>>(out var testServices, (services) =>
+            {
+                // Add named options configuration AFTER other configuration
+                services.AddOptions();
+                services.AddOptions<TestOptions>()
+                            .Configure((sp, name, options) =>
+                            {
+                                Interlocked.Increment(ref invocationCount);
+                                options.Name = name;
+                            });
+
+            });
+
+            // var names = new List<string>() { "foo", "foo-v2", "bar", "bar-v2" };
+            foreach (var name in names)
+            {
+                var options = optionsSnapshot.Get(name);
+                Assert.NotNull(options);
+                Assert.Equal(name, options.Name);
+            }
+
+            var distinctNamedCount = names.Distinct().Count();
+            Assert.Equal(distinctNamedCount, invocationCount);
+        }
+
         [Fact]
         public void OptionsMonitor_GetNamedOptions_AfterChangeTokenTriggered_InvokesConfigureActionAgain()
         {
@@ -63,12 +98,12 @@ namespace Dazinator.Extensions.Options.Tests.Integration
                         return cancelTokenSourceToBeCancelled.Token;
                     }
                     return cancelTokenSourceNext.Token;
-                });               
+                });
 
                 services.AddSingleton<IOptionsChangeTokenSource<TestOptions>>(testChangeTokenSource);
                 services.Configure<TestOptions>("bar", options =>
-                {                   
-                    
+                {
+
                 });
                 services.Configure<TestOptions>((sp, name, options) =>
                 {
