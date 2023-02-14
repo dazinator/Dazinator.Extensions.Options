@@ -56,7 +56,6 @@ namespace Dazinator.Extensions.Options.Tests.Integration
             var optionsSnapshot = TestHelper.CreateTestSubject<IOptionsSnapshot<TestOptions>>(out var testServices, (services) =>
             {
                 // Add named options configuration AFTER other configuration
-                services.AddOptions();
                 services.AddOptions<TestOptions>()
                             .Configure((sp, name, options) =>
                             {
