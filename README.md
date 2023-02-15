@@ -4,8 +4,7 @@ Provides additional capabilities for `Microsoft.Extensions.Options`.
 
 ### Configure dynamically named options
 
-An additional `Configure` api is provided so that you can dynamically configure options based on the name requested at ruintime,
-without having to register all the named options in advance on startup.
+Additional `Configure` api's are provided for configuring `Microsoft.Extensions.Options` `Options` so that you can dynamically configure an options when it is first requested, rather than at the point of registration.
 
 e.g the "out of the box" behaviour is to register various named options like this, specifying the name at point of registration:-
 
@@ -20,7 +19,7 @@ e.g the "out of the box" behaviour is to register various named options like thi
 For many this will be good enough and you do not need this library.
 
 However in an advanced scenario, suppose you wish to request new names at runtime.
-In this case you'd like to have a way to intercept and configure this new named options at the point it is requested for the first time.
+In this case you'd like to have a way to intercept and configure new named options at the point they are requested for the first time.
 
 This library provides such a mechanism, via some overloads for `Configure` that allow you to supply familiar constructs such as an `Action` to confiugre the options instance, or an `IConfiguration` at the point of request as opposed to registration, where the options name is provided to you as an argument. 
 
