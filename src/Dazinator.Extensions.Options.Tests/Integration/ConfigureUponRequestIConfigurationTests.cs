@@ -6,13 +6,13 @@ namespace Dazinator.Extensions.Options.Tests.Integration
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
 
-    public class ConfigurationBoundOptionsIntegrationTests
+    public class ConfigureUponRequestIConfigurationTests
     {
 
         [Theory]
         [InlineData("foo", "foo-v2", "bar", "bar-v2")] // each 
         [InlineData("foo", "foo", "foo", "foo", "foo")]
-        public void OptionsSnapshot_GetNamedOptions_ReturnsOptionsBoundFromConfigDynamically(params string[] names)
+        public void ConfigureUponRequest_WithIConfiguration_InvokedOncePerNamedOptions(params string[] names)
         {
             var invocationCount = 0;
 
@@ -32,7 +32,7 @@ namespace Dazinator.Extensions.Options.Tests.Integration
                   configBuilder.AddInMemoryCollection(inMemoryConfigValues);
                   IConfiguration config = configBuilder.Build();
 
-                  services.Configure<TestOptions>((name) =>
+                  services.ConfigureUponRequest<TestOptions>((name) =>
                   {
                       // dynamically bind named options to config section.
                       Interlocked.Increment(ref invocationCount);
@@ -56,7 +56,7 @@ namespace Dazinator.Extensions.Options.Tests.Integration
         [Theory]
         [InlineData("foo", "foo-v2", "bar", "bar-v2")] // each 
         [InlineData("foo", "foo", "foo", "foo", "foo")]
-        public void OptionsSnapshot_GetNamedOptions_WhenConfiguredWithOptionsMonitor_ReturnsOptionsBoundFromConfigDynamically(params string[] names)
+        public void BindConfigurationUponRequest_InvokedOncePerNamedOptions(params string[] names)
         {
             var invocationCount = 0;
 
@@ -76,7 +76,7 @@ namespace Dazinator.Extensions.Options.Tests.Integration
 
                 // Add named options configuration AFTER other configuration
                 services.AddOptions<TestOptions>()
-                        .Configure<TestOptions>((name) =>
+                        .BindConfigurationUponRequest<TestOptions>((name) =>
                         {
                             // dynamically bind named options to config section based on options name requested at runtime.
                             Interlocked.Increment(ref invocationCount);

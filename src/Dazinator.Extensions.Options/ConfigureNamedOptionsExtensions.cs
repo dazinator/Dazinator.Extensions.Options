@@ -7,7 +7,7 @@ namespace Microsoft.Extensions.Options
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
 
-    public static class ActionConfigureNamedOptionsExtensions
+    public static class ConfigureNamedOptionsExtensions
     {
         /// <summary>
         /// Configure a named options instance, lazily, i.e. the first trime it is requested, using an Action delegate.
@@ -16,7 +16,7 @@ namespace Microsoft.Extensions.Options
         /// <param name="services"></param>
         /// <param name="configureAction"></param>
         /// <returns></returns>
-        public static IServiceCollection Configure<TOptions>(this IServiceCollection services, Action<string, TOptions> configureAction)
+        public static IServiceCollection ConfigureUponRequest<TOptions>(this IServiceCollection services, Action<string, TOptions> configureAction)
             where TOptions : class
         {
             services.AddSingleton(sp => new ConfigureActionOptions<TOptions>(null, (s, n, o) => configureAction?.Invoke(n, o)));
@@ -31,7 +31,7 @@ namespace Microsoft.Extensions.Options
         /// <param name="services"></param>
         /// <param name="configureAction"></param>
         /// <returns></returns>
-        public static IServiceCollection Configure<TOptions>(this IServiceCollection services, Action<IServiceProvider?, string, TOptions> configureAction)
+        public static IServiceCollection ConfigureUponRequest<TOptions>(this IServiceCollection services, Action<IServiceProvider?, string, TOptions> configureAction)
            where TOptions : class
         {
             services.AddSingleton(sp => new ConfigureActionOptions<TOptions>(sp, configureAction));
@@ -46,10 +46,10 @@ namespace Microsoft.Extensions.Options
         /// <param name="services"></param>
         /// <param name="configureAction"></param>
         /// <returns></returns>
-        public static IServiceCollection Configure<TOptions>(this IServiceCollection services, Func<string, IConfiguration> getConfig, Action<string, BinderOptions>? configureBinder = null)
+        public static IServiceCollection ConfigureUponRequest<TOptions>(this IServiceCollection services, Func<string, IConfiguration> getConfig, Action<string, BinderOptions>? configureBinder = null)
            where TOptions : class
         {
-            Configure<TOptions>(services, (sp, name, options) =>
+            ConfigureUponRequest<TOptions>(services, (sp, name, options) =>
             {
                 var configToBind = getConfig(name);
                 Action<BinderOptions>? configureBinding = configureBinder == null ? null : (bindingOptions) => configureBinder?.Invoke(name, bindingOptions);
@@ -80,11 +80,10 @@ namespace Microsoft.Extensions.Options
         /// <param name="configureAction"></param>
         /// <returns></returns>
         /// <remarks>Convenience method to allow fluent api building when working with <see cref="OptionsBuilder<>"/>.</remarks>
-        public static OptionsBuilder<TOptions> Configure<TOptions>(this OptionsBuilder<TOptions> optionsBuilder, Action<string, TOptions> configureAction)
+        public static OptionsBuilder<TOptions> ConfigureUponRequest<TOptions>(this OptionsBuilder<TOptions> optionsBuilder, Action<string, TOptions> configureAction)
           where TOptions : class
         {
-
-            optionsBuilder.Services.Configure(configureAction);
+            optionsBuilder.Services.ConfigureUponRequest(configureAction);
             return optionsBuilder;
         }
 
@@ -96,11 +95,10 @@ namespace Microsoft.Extensions.Options
         /// <param name="configureAction"></param>
         /// <returns></returns>
         /// <remarks>Convenience method to allow fluent api building when working with <see cref="OptionsBuilder<>"/>.</remarks>
-        public static OptionsBuilder<TOptions> Configure<TOptions>(this OptionsBuilder<TOptions> optionsBuilder, Action<IServiceProvider?, string, TOptions> configureAction)
+        public static OptionsBuilder<TOptions> ConfigureUponRequest<TOptions>(this OptionsBuilder<TOptions> optionsBuilder, Action<IServiceProvider?, string, TOptions> configureAction)
           where TOptions : class
         {
-
-            optionsBuilder.Services.Configure(configureAction);
+            optionsBuilder.Services.ConfigureUponRequest(configureAction);
             return optionsBuilder;
         }
 
@@ -113,11 +111,10 @@ namespace Microsoft.Extensions.Options
         /// <param name="configureAction"></param>
         /// <returns></returns>
         /// <remarks>Convenience method to allow fluent api building when working with <see cref="OptionsBuilder<>"/>.</remarks>
-        public static OptionsBuilder<TOptions> Configure<TOptions>(this OptionsBuilder<TOptions> optionsBuilder, Func<string, IConfiguration> getConfig, Action<string, BinderOptions>? configureBinder = null)
+        public static OptionsBuilder<TOptions> BindConfigurationUponRequest<TOptions>(this OptionsBuilder<TOptions> optionsBuilder, Func<string, IConfiguration> getConfig, Action<string, BinderOptions>? configureBinder = null)
           where TOptions : class
         {
-
-            optionsBuilder.Services.Configure<TOptions>(getConfig, configureBinder);
+            optionsBuilder.Services.ConfigureUponRequest<TOptions>(getConfig, configureBinder);
             return optionsBuilder;
         }
 

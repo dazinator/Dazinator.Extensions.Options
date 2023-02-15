@@ -6,20 +6,20 @@ namespace Dazinator.Extensions.Options.Tests.Integration
     using Microsoft.Extensions.Options;
     using Microsoft.Extensions.Primitives;
 
-    public class ActionBoundOptionsIntegrationTests
+    public class ConfigureUponRequestActionTests
     {
 
         [Theory]
         [InlineData("foo", "foo-v2", "bar", "bar-v2")] // each 
         [InlineData("foo", "foo", "foo", "foo", "foo")]
-        public void OptionsSnapshot_GetNamedOptions_InvokesConfigureActionOncePerName(params string[] names)
+        public void ConfigureUponRequest_Action_InvokedOncePerNamedOptions(params string[] names)
         {
             var invocationCount = 0;
 
             var optionsSnapshot = TestHelper.CreateTestSubject<IOptionsSnapshot<TestOptions>>(out var testServices, (services) =>
               {
                   services.AddOptions();
-                  services.Configure<TestOptions>((sp, name, options) =>
+                  services.ConfigureUponRequest<TestOptions>((sp, name, options) =>
                   {
                       Interlocked.Increment(ref invocationCount);
                       options.Name = name;
@@ -41,15 +41,15 @@ namespace Dazinator.Extensions.Options.Tests.Integration
         [Theory]
         [InlineData("foo", "foo-v2", "bar", "bar-v2")] // each 
         [InlineData("foo", "foo", "foo", "foo", "foo")]
-        public void Can_Configure_Using_OptionsBuilder(params string[] names)
+        public void ConfigureUponRequest_OptionsBuilderStyle_InvokedOncePerNamedOptions(params string[] names)
         {
             var invocationCount = 0;
 
             var optionsSnapshot = TestHelper.CreateTestSubject<IOptionsSnapshot<TestOptions>>(out var testServices, (services) =>
             {
                 // Add named options configuration AFTER other configuration
-                services.AddOptions<TestOptions>()
-                            .Configure((sp, name, options) =>
+                services.AddOptions<TestOptions>() // note: we AddOptions without any "name" argument, but the below is invoked style per each name requested.
+                            .ConfigureUponRequest((sp, name, options) =>
                             {
                                 Interlocked.Increment(ref invocationCount);
                                 options.Name = name;
@@ -69,7 +69,7 @@ namespace Dazinator.Extensions.Options.Tests.Integration
         }
 
         [Fact]
-        public void OptionsMonitor_GetNamedOptions_AfterChangeTokenTriggered_InvokesConfigureActionAgain()
+        public void ConfigureUponRequest_Action_InvokedAgainAfterChangeTokenTriggered()
         {
             var invocationCount = 0;
             using var cancelTokenSourceToBeCancelled = new CancellationTokenSource();
@@ -95,7 +95,7 @@ namespace Dazinator.Extensions.Options.Tests.Integration
                 {
 
                 });
-                services.Configure<TestOptions>((sp, name, options) =>
+                services.ConfigureUponRequest<TestOptions>((sp, name, options) =>
                 {
                     Interlocked.Increment(ref invocationCount);
                     options.Name = name;
