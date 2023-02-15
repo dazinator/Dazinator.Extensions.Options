@@ -6,12 +6,9 @@ namespace Dazinator.Extensions.Options.Tests.Integration
     using Microsoft.Extensions.Options;
     using Microsoft.Extensions.Primitives;
 
-    public class ActionConfigureNamedOptionsIntegrationTests
+    public class ActionBoundOptionsIntegrationTests
     {
 
-        /// <summary>
-        /// Verifies that when a http client with a name is requested, we can configure it's <see cref="HttpClientFactoryOptions"/> and this configuration happens once per name.
-        /// </summary>
         [Theory]
         [InlineData("foo", "foo-v2", "bar", "bar-v2")] // each 
         [InlineData("foo", "foo", "foo", "foo", "foo")]
@@ -21,7 +18,6 @@ namespace Dazinator.Extensions.Options.Tests.Integration
 
             var optionsSnapshot = TestHelper.CreateTestSubject<IOptionsSnapshot<TestOptions>>(out var testServices, (services) =>
               {
-                  // Add named options configuration AFTER other configuration
                   services.AddOptions();
                   services.Configure<TestOptions>((sp, name, options) =>
                   {
@@ -31,7 +27,6 @@ namespace Dazinator.Extensions.Options.Tests.Integration
 
               });
 
-            // var names = new List<string>() { "foo", "foo-v2", "bar", "bar-v2" };
             foreach (var name in names)
             {
                 var options = optionsSnapshot.Get(name);
@@ -43,9 +38,6 @@ namespace Dazinator.Extensions.Options.Tests.Integration
             Assert.Equal(distinctNamedCount, invocationCount);
         }
 
-        /// <summary>
-        /// Verifies that when a http client with a name is requested, we can configure it's <see cref="HttpClientFactoryOptions"/> and this configuration happens once per name.
-        /// </summary>
         [Theory]
         [InlineData("foo", "foo-v2", "bar", "bar-v2")] // each 
         [InlineData("foo", "foo", "foo", "foo", "foo")]
@@ -65,7 +57,6 @@ namespace Dazinator.Extensions.Options.Tests.Integration
 
             });
 
-            // var names = new List<string>() { "foo", "foo-v2", "bar", "bar-v2" };
             foreach (var name in names)
             {
                 var options = optionsSnapshot.Get(name);

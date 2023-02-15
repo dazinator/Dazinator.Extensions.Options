@@ -13,6 +13,7 @@ namespace Dazinator.Extensions.Options
 
         // This won't be called, but is required for the interface
         public void Configure(TOptions options) => Configure(Options.DefaultName, options);
+
     }
 
 }

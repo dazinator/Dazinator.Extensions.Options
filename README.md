@@ -4,8 +4,10 @@ Provides additional capabilities for `Microsoft.Extensions.Options`.
 
 ### Configure dynamically named options
 
-The standard `Microsoft.Extensions.Options` functionality allows you to register "named" options in startup code.
-However, you must know all of the names of the options that will be requested - ahead of time - i.e at the point of registration, e.g:
+An additional `Configure` api is provided so that you can dynamically configure options based on the name requested at ruintime,
+without having to register all the named options in advance on startup.
+
+e.g the "out of the box" behaviour is to register various named options like this, specifying the name at point of registration:-
 
 ```cs
  services.Configure<TestOptions>("foo", options =>
@@ -15,14 +17,12 @@ However, you must know all of the names of the options that will be requested - 
 
 ```
 
-This means you can then request options with this name at runtime, and the configuration delegates you have supplied will configure the instance accordingly - great.
-For many this will be good enough.
+For many this will be good enough and you do not need this library.
 
-However in an advanced scenario, suppose you wish to supply dynamic names.
-For example, at runtime you need to request a new name like "bar-v2" that wasn't registered in advance.
-In this case you'd like to have a way to intercept and configure this new named options.
+However in an advanced scenario, suppose you wish to request new names at runtime.
+In this case you'd like to have a way to intercept and configure this new named options at the point it is requested for the first time.
 
-This library provides such a mechanism, via some overloads that allow you to supply an `Action` delegate that will be invoked, with the name supplied as an argument:
+This library provides such a mechanism, via some overloads for `Configure` that allow you to supply familiar constructs such as an `Action` to confiugre the options instance, or an `IConfiguration` at the point of request as opposed to registration, where the options name is provided to you as an argument. 
 
 ```cs
 services.Configure<TestOptions>((sp, name, options) =>
@@ -35,8 +35,29 @@ services.Configure<TestOptions>((sp, name, options) =>
 
 You can now request whatever named options you like at runtime, and the method above will be invoked to configure these instances how you please.
 
-The primary use case for this feature is `IHttpClientFactory`, which uses named `HttpClientFactoryOptions` behind the scenes.
-By supplying different names you can kind of "cache bust" and force a new HttpClient to be built that uses the latest configuration.
+
+## IConfiguration example
+
+An additional `Configure` api is provided so that you can dynamically configure options from IConfiguration, i.e based on the options name requested at runtime. 
+
+```cs
+
+   IConfiguration config = GetConfiguration();
+
+   services.Configure<TestOptions>((name) =>
+   {
+       // dynamically configure the options by returning an IConfiguration it should be bound form here,
+       // you could select a config section based on the options name requested at runtime for exampl.
+       return config.GetSection(name);
+   }
+```
+
+## Use Cases (Background Info)
+
+The primary use case for dynamic configuration of options is `IHttpClientFactory` scenarios.
+`IHttpClientFactory` uses named `HttpClientFactoryOptions` behind the scenes to configure HttpClients.
+
+By supplying different names you can kind of "cache bust" and force a new HttpClient to be built that will apply new configuration.
 
 The default `IHttpClientFactory` provided by Microsoft, builds and pools handlers for a given `name`d http client, and uses the `HttpClientFactoryOptions` registered with the same name to do this.
 So if you've configured a http client named "foo" and you later use that http client via the factory - it will be built according to the `HttpClientFactoryOptions` with the same name - if you want to change this confiugration, you can't.
