@@ -12,7 +12,7 @@ namespace Dazinator.Extensions.Options.Tests.Integration
         [Theory]
         [InlineData("foo", "foo-v2", "bar", "bar-v2")] // each 
         [InlineData("foo", "foo", "foo", "foo", "foo")]
-        public void ConfigureUponRequest_WithIConfiguration_InvokedOncePerNamedOptions(params string[] names)
+        public void ServiceCollection_ConfigureUponRequest_FromIConfiguration_InvokedOncePerNamedOptions(params string[] names)
         {
             var invocationCount = 0;
 
@@ -32,7 +32,7 @@ namespace Dazinator.Extensions.Options.Tests.Integration
                   configBuilder.AddInMemoryCollection(inMemoryConfigValues);
                   IConfiguration config = configBuilder.Build();
 
-                  services.ConfigureUponRequest<TestOptions>((name) =>
+                  services.ConfigureUponRequest<TestOptions>().From((name) =>
                   {
                       // dynamically bind named options to config section.
                       Interlocked.Increment(ref invocationCount);
@@ -56,7 +56,7 @@ namespace Dazinator.Extensions.Options.Tests.Integration
         [Theory]
         [InlineData("foo", "foo-v2", "bar", "bar-v2")] // each 
         [InlineData("foo", "foo", "foo", "foo", "foo")]
-        public void BindConfigurationUponRequest_InvokedOncePerNamedOptions(params string[] names)
+        public void OptionsBuilder_ConfigureUponRequest_InvokedOncePerNamedOptions(params string[] names)
         {
             var invocationCount = 0;
 
@@ -76,7 +76,7 @@ namespace Dazinator.Extensions.Options.Tests.Integration
 
                 // Add named options configuration AFTER other configuration
                 services.AddOptions<TestOptions>()
-                        .BindConfigurationUponRequest<TestOptions>((name) =>
+                        .ConfigureUponRequest<TestOptions>().From((name) =>
                         {
                             // dynamically bind named options to config section based on options name requested at runtime.
                             Interlocked.Increment(ref invocationCount);

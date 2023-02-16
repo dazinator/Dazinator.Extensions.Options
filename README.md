@@ -24,12 +24,11 @@ In this case you'd like to have a way to intercept and configure new named optio
 This library provides such a mechanism, via some additional `Configure` style methods that allow you to supply familiar constructs such as an `Action` to confiugre the options instance, or an `IConfiguration` at the point of request as opposed to registration, where the options name is provided to you as an argument. 
 
 ```cs
-services.ConfigureUponRequest<TestOptions>((sp, name, options) =>
-                {
-                  // name is the name that has been requested.
-                    
+ services.ConfigureUponRequest<TestOptions>()
+         .From((sp, name, options) =>
+                {                   
+                    // configure your options for the requested name without having to register this name in advance.
                 });
-
 ```
 
 You can now request whatever named options you like at runtime, and the method above will be invoked to configure these instances how you please.
@@ -37,18 +36,18 @@ You can now request whatever named options you like at runtime, and the method a
 
 ## IConfiguration example
 
-An additional api is provided so that you can select an `IConfiguration` to configure the options upon request: 
+You can also bind from `IConfiguration`:
 
 ```cs
 
    IConfiguration config = GetConfiguration();
 
-   services.ConfigureUponRequest<TestOptions>((name) =>
-   {
-       // dynamically configure the options by returning an IConfiguration it should be bound form here,
-       // you could select a config section based on the options name requested at runtime for exampl.
-       return config.GetSection(name);
-   }
+   services.ConfigureUponRequest<TestOptions>()
+           .From((sp, name, options) =>
+                {                   
+                    // configure your options for the requested name without having to register this name in advance.
+                     return config.GetSection(name);
+                });
 ```
 
 ## Use Cases (Background Info)
@@ -64,7 +63,7 @@ Therefore if you want reconfigure a named http client at runtime (for example, c
 This forces the `IHttpClientFactory` to miss its cache, and build a new http client which can be based on the latest configuration.
 
 ```cs
-services.ConfigureUponRequest<HttpClientFactoryOptions>((sp, name, options) =>
+services.ConfigureUponRequest<HttpClientFactoryOptions>().From((sp, name, options) =>
                 {
                   // name is the httpclient name that has been requested.
                   var httpClientName = SplitOnDashAndTakeFirstSegment(name);
