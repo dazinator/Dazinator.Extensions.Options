@@ -13,27 +13,27 @@ namespace Microsoft.Extensions.Options
     public class ConfigureUponRequestBuilder<TOptions, TInner>
          where TOptions : class
     {
-        private readonly IServiceCollection _services;
         private readonly TInner _inner;
 
         public ConfigureUponRequestBuilder(IServiceCollection services, TInner inner)
         {
-            _services = services;
+            Services = services;
             _inner = inner;
         }
 
+        public IServiceCollection Services { get; }
 
         public TInner From(Action<string, TOptions> configureAction)
         {
-            _services.AddSingleton(sp => new ConfigureActionOptions<TOptions>(null, (s, n, o) => configureAction?.Invoke(n, o)));
-            _services.AddSingleton<IConfigureOptions<TOptions>, ActionConfigureNamedOptions<TOptions>>();
+            Services.AddSingleton(sp => new ConfigureActionOptions<TOptions>(null, (s, n, o) => configureAction?.Invoke(n, o)));
+            Services.AddSingleton<IConfigureOptions<TOptions>, ActionConfigureNamedOptions<TOptions>>();
             return _inner;
         }
 
         public TInner From(Action<IServiceProvider?, string, TOptions> configureAction)
         {
-            _services.AddSingleton(sp => new ConfigureActionOptions<TOptions>(sp, configureAction));
-            _services.AddSingleton<IConfigureOptions<TOptions>, ActionConfigureNamedOptions<TOptions>>();
+            Services.AddSingleton(sp => new ConfigureActionOptions<TOptions>(sp, configureAction));
+            Services.AddSingleton<IConfigureOptions<TOptions>, ActionConfigureNamedOptions<TOptions>>();
             return _inner;
         }
 
@@ -49,9 +49,9 @@ namespace Microsoft.Extensions.Options
                 changeTokenSourceManager.EnsureRegistered(name, configToBind);
             });
 
-            _services.AddSingleton<DynamicOptionsMonitor<TOptions>>();
-            _services.AddSingleton<IOptionsMonitor<TOptions>>(sp => sp.GetRequiredService<DynamicOptionsMonitor<TOptions>>());
-            _services.AddSingleton<DynamicOptionsConfigurationChangeTokenSourceManager<TOptions>>();
+            Services.AddSingleton<DynamicOptionsMonitor<TOptions>>();
+            Services.AddSingleton<IOptionsMonitor<TOptions>>(sp => sp.GetRequiredService<DynamicOptionsMonitor<TOptions>>());
+            Services.AddSingleton<DynamicOptionsConfigurationChangeTokenSourceManager<TOptions>>();
             return _inner;
 
         }
